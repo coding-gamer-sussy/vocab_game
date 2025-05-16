@@ -2,9 +2,9 @@ let english = [], chinese = [], pos = [], index = 0;
 
 async function loadFiles() {
   [english, chinese, pos] = await Promise.all([
-    fetch('english.txt').then(r => r.text()).then(t => t.trim().split('\n')),
-    fetch('chinese.txt').then(r => r.text()).then(t => t.trim().split('\n')),
-    fetch('pos.txt').then(r => r.text()).then(t => t.trim().split('\n'))
+    fetch('english_voc.txt').then(r => r.text()).then(t => t.trim().split('\n')),
+    fetch('chinese_voc.txt').then(r => r.text()).then(t => t.trim().split('\n')),
+    fetch('part_of_speech.txt').then(r => r.text()).then(t => t.trim().split('\n'))
   ]);
   nextWord();
 }
