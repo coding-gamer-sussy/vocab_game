@@ -11,3 +11,11 @@ body {
   box-shadow: 0 0 10px #ccc;
   display: inline-block;
 }
+#profile-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #aaa;
+  display: inline-block;
+  margin-top: 1rem;
+}
