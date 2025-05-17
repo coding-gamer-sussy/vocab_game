@@ -1,40 +1,56 @@
-<<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>User Profile</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Your Profile</title>
 </head>
 <body>
-  <h1>User Profile</h1>
-  <div id="profile-card">
-    <p><strong>Username:</strong> <span id="username">Guest</span></p>
-    <p><strong>Flashcards viewed:</strong> <span id="words">0</span></p>
-    <p><strong>Favorites:</strong> <span id="favorites">0</span></p>
-    <p><strong>Total XP:</strong> <span id="xp">0</span></p>
-    <p><strong>Words Practiced:</strong> <span id="practiced">0</span></p>
-    <button onclick="clearStats()">Reset Stats</button>
-    <br><br>
-    <a href="index.html">← Back to Practice</a>
-  </div>
+  <h1>Profile</h1>
+  <p><strong>Total XP:</strong> <span id="xp">0</span></p>
+  <p><strong>Words Practiced:</strong> <span id="practiced">0</span></p>
+  <button onclick="clearStats()">Reset Stats</button>
 
+  <h2>Review Lists</h2>
+
+  <h3>❌ Wrongs</h3>
+  <ul id="wrongsList"></ul>
+
+  <h3>★ Favorites</h3>
+  <ul id="favoritesList"></ul>
+
+  <script src="script.js"></script>
   <script>
-    document.getElementById('username').textContent = localStorage.getItem('username') || 'Guest';
-    document.getElementById('words').textContent = localStorage.getItem('wordsPracticed') || 0;
-    document.getElementById('favorites').textContent = JSON.parse(localStorage.getItem('favorites') || '[]').length;
     document.getElementById('xp').textContent = localStorage.getItem('totalXP') || 0;
     document.getElementById('practiced').textContent = localStorage.getItem('totalPracticed') || 0;
 
+    function loadReviewLists() {
+      let wrongs = JSON.parse(localStorage.getItem('wrongs') || '[]');
+      let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+      const wrongListElem = document.getElementById('wrongsList');
+      const favListElem = document.getElementById('favoritesList');
+
+      wrongs.forEach(word => {
+        const li = document.createElement('li');
+        li.textContent = word;
+        wrongListElem.appendChild(li);
+      });
+
+      favorites.forEach(word => {
+        const li = document.createElement('li');
+        li.textContent = word;
+        favListElem.appendChild(li);
+      });
+    }
 
     function clearStats() {
-      localStorage.removeItem('wordsPracticed');
-      localStorage.removeItem('favorites');
-      localStorage.removeItem('username');
       localStorage.removeItem('totalXP');
       localStorage.removeItem('totalPracticed');
-      alert('Stats reset.');
+      localStorage.removeItem('wrongs');
+      localStorage.removeItem('favorites');
       location.reload();
     }
+
+    loadReviewLists();
   </script>
 </body>
 </html>
