@@ -1,124 +1,94 @@
-let english = [], chinese = [], pos = [], index = 0;
+let english = [], chinese = [], pos = [];
+let currentWordIndex;
 
-async function loadFiles() {
-  [english, chinese, pos] = await Promise.all([
-    fetch('english.txt').then(r => r.text()).then(t => t.trim().split('\n')),
-    fetch('chinese.txt').then(r => r.text()).then(t => t.trim().split('\n')),
-    fetch('pos.txt').then(r => r.text()).then(t => t.trim().split('\n'))
-  ]);
-  nextWord();
+function loadFiles() {
+  fetch('english.txt')
+    .then(res => res.text())
+    .then(text => {
+      english = text.trim().split('\n');
+      return fetch('chinese.txt');
+    })
+    .then(res => res.text())
+    .then(text => {
+      chinese = text.trim().split('\n');
+      return fetch('pos.txt');
+    })
+    .then(res => res.text())
+    .then(text => {
+      pos = text.trim().split('\n');
+      nextWord();
+    });
 }
 
 function nextWord() {
-  if (english.length === 0) return;
-  index = Math.floor(Math.random() * english.length);
-
-  document.getElementById('question').innerHTML =
-    `<strong>${english[index]}</strong> (${pos[index]})<br>意思：${chinese[index]}`;
-
-  // Track number of words practiced
-  let practiced = Number(localStorage.getItem('wordsPracticed') || '0');
-  localStorage.setItem('wordsPracticed', practiced + 1);
+  currentWordIndex = Math.floor(Math.random() * english.length);
+  document.getElementById('chinese').textContent = chinese[currentWordIndex] + ' (' + pos[currentWordIndex] + ')';
+  document.getElementById('answer').value = '';
+  document.getElementById('result').textContent = '';
 }
 
-function addFavorite() {
-  let favs = JSON.parse(localStorage.getItem('favorites') || '[]');
-  let word = english[index];
-  if (!favs.includes(word)) {
-    favs.push(word);
-    localStorage.setItem('favorites', JSON.stringify(favs));
-    alert(`Added "${word}" to favorites!`);
+function checkAnswer() {
+  const userAns = document.getElementById('answer').value.trim().toLowerCase();
+  const correct = english[currentWordIndex].toLowerCase();
+  document.getElementById('result').textContent = userAns === correct ? 'Correct!' : 'Wrong! Answer: ' + correct;
+}
+
+function addToFavorites() {
+  if (currentWordIndex === undefined) return;
+  let wordEntry = `${chinese[currentWordIndex]} = ${english[currentWordIndex]} (${pos[currentWordIndex]})`;
+  let storedFavs = JSON.parse(localStorage.getItem('favorites') || '[]');
+  if (!storedFavs.includes(wordEntry)) {
+    storedFavs.push(wordEntry);
+    localStorage.setItem('favorites', JSON.stringify(storedFavs));
+    alert("Added to favorites!");
   } else {
-    alert(`"${word}" is already in favorites.`);
+    alert("Already in favorites.");
   }
 }
 
-function saveUsername() {
-  let name = document.getElementById('usernameInput').value.trim();
-  if (name) {
-    localStorage.setItem('username', name);
-    alert(`Saved name: ${name}`);
-  }
-}
+// ---- Quiz Mode (used in quiz.html) ----
+let quizTotal = 0, quizCorrect = 0, quizWrong = [];
 
-// QUIZ VARIABLES
-let quizIndex = 0, quizTotal = 0, quizCorrect = 0;
-let quizOrder = [], quizWrong = [];
-
-// Start Quiz
 function startQuiz() {
-  quizTotal = parseInt(document.getElementById('quizCount').value);
-  if (isNaN(quizTotal) || quizTotal < 1) return alert("Enter a valid number.");
-  
-  quizIndex = 0;
+  quizTotal = Number(prompt("How many questions?"));
   quizCorrect = 0;
   quizWrong = [];
-
-  quizOrder = [];
-  for (let i = 0; i < quizTotal; i++) {
-    quizOrder.push(Math.floor(Math.random() * english.length));
-  }
-
-  document.getElementById('setup').style.display = 'none';
-  document.getElementById('quiz').style.display = 'block';
-  showQuizQuestion();
+  askQuestion(0);
 }
 
-// Show current quiz question
-function showQuizQuestion() {
-  let i = quizOrder[quizIndex];
-  let hint = english[i][0]; // first letter
-  document.getElementById('quizQuestion').innerHTML =
-    `${chinese[i]} (${hint}-) [${pos[i]}]`;
-  document.getElementById('quizAnswer').value = '';
-  document.getElementById('quizAnswer').focus();
-  document.getElementById('progress').innerText = `Question ${quizIndex + 1} of ${quizTotal}`;
-}
+function askQuestion(i) {
+  if (i >= quizTotal) return finishQuiz();
 
-// Handle answer
-function submitAnswer() {
-  let i = quizOrder[quizIndex];
-  let userAns = document.getElementById('quizAnswer').value.trim().toLowerCase();
-  let correctAns = english[i].toLowerCase();
-
-  if (userAns === correctAns) {
+  const index = Math.floor(Math.random() * english.length);
+  const userAns = prompt(`${chinese[index]} (開頭-${english[index][0]}) (${pos[index]})`).trim().toLowerCase();
+  if (userAns === english[index].toLowerCase()) {
     quizCorrect++;
   } else {
-    quizWrong.push(`${chinese[i]} = ${correctAns}`);
+    quizWrong.push(`${chinese[index]} = ${english[index]} (${pos[index]})`);
   }
-
-  quizIndex++;
-  if (quizIndex < quizTotal) {
-    showQuizQuestion();
-  } else {
-    finishQuiz();
-  }
+  askQuestion(i + 1);
 }
 
-// End of quiz
 function finishQuiz() {
-  document.getElementById('quiz').style.display = 'none';
-  document.getElementById('result').style.display = 'block';
+  const correctness = quizCorrect / quizTotal;
+  const xp = Math.floor(Math.sqrt(quizTotal * quizCorrect) * (1 / (1.01 - correctness)) * Math.log10(quizTotal));
 
-  let correctness = quizCorrect / quizTotal;
-  let xp = Math.sqrt(quizTotal * quizCorrect) * (1 / (1.01 - correctness)) * Math.log10(quizTotal);
-  xp = Math.round(xp);
-
-  // Save XP to localStorage
+  // Save XP
   let prevXP = Number(localStorage.getItem('totalXP') || '0');
   localStorage.setItem('totalXP', prevXP + xp);
 
-  // Save total practiced words
+  // Save Words Practiced
   let prevPracticed = Number(localStorage.getItem('totalPracticed') || '0');
   localStorage.setItem('totalPracticed', prevPracticed + quizTotal);
 
+  // Save Wrongs
+  let storedWrongs = JSON.parse(localStorage.getItem('wrongs') || '[]');
+  for (let item of quizWrong) {
+    if (!storedWrongs.includes(item)) {
+      storedWrongs.push(item);
+    }
+  }
+  localStorage.setItem('wrongs', JSON.stringify(storedWrongs));
 
-  document.getElementById('scoreSummary').innerText =
-    `Correct: ${quizCorrect} / ${quizTotal} (${Math.round(correctness * 100)}%)`;
-  document.getElementById('xpGained').innerText = `You earned ${xp} XP!`;
-
-  document.getElementById('wrongList').innerHTML = 
-    quizWrong.length > 0 ? `<strong>Incorrect words:</strong><br>${quizWrong.join('<br>')}` : '';
+  alert(`Quiz finished! Correct: ${quizCorrect}/${quizTotal}, XP earned: ${xp}`);
 }
-
-loadFiles();
