@@ -19,4 +19,18 @@ function nextWord() {
   localStorage.setItem('wordsPracticed', practiced + 1);
 }
 
+function addFavorite() {
+  let favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+  let currentWord = english[index];
+
+  // Avoid duplicates
+  if (!favs.includes(currentWord)) {
+    favs.push(currentWord);
+    localStorage.setItem('favorites', JSON.stringify(favs));
+    alert(`Added "${currentWord}" to favorites!`);
+  } else {
+    alert(`"${currentWord}" is already in favorites.`);
+  }
+}
+
 loadFiles();
