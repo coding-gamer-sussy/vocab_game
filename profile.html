@@ -6,6 +6,7 @@
 </head>
 <body>
   <h1>Profile</h1>
+  <p><strong>Username:</strong> <span id="username"></span></p>
   <p><strong>Total XP:</strong> <span id="xp">0</span></p>
   <p><strong>Words Practiced:</strong> <span id="practiced">0</span></p>
   <button onclick="clearStats()">Reset Stats</button>
@@ -24,6 +25,7 @@
   <script>
     document.getElementById('xp').textContent = localStorage.getItem('totalXP') || 0;
     document.getElementById('practiced').textContent = localStorage.getItem('totalPracticed') || 0;
+    document.getElementById('username').textContent = localStorage.getItem('username') || "Guest";
 
     function loadReviewLists() {
       let wrongs = JSON.parse(localStorage.getItem('wrongs') || '[]');
@@ -50,6 +52,7 @@
       localStorage.removeItem('totalPracticed');
       localStorage.removeItem('wrongs');
       localStorage.removeItem('favorites');
+      localStorage.removeItem('username');
       location.reload();
     }
 
