@@ -1,37 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>Quiz Mode</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Vocabulary Quiz</h1>
-  
-  <div id="setup">
-    <p>How many questions?</p>
-    <input type="number" id="quizCount" min="1" value="5">
-    <button onclick="startQuiz()">Start Quiz</button>
-  </div>
-
-  <div id="quiz" style="display:none;">
-    <p id="quizQuestion"></p>
-    <input type="text" id="quizAnswer">
-    <button onclick="submitAnswer()">Submit</button>
-    <p id="progress"></p>
-  </div>
-
-  <div id="result" style="display:none;">
-    <h2>Quiz Results</h2>
-    <p id="scoreSummary"></p>
-    <p id="xpGained"></p>
-    <p id="wrongList"></p>
-    <a href="index.html">← Back to Practice</a>
-  </div>
-
+  <h1>Quiz Mode</h1>
+  <button onclick="startQuiz()">Start Quiz</button>
+  <p>After clicking, you'll be asked how many questions.</p>
+  <br><a href="index.html">Back to Practice</a>
   <script src="script.js"></script>
   <script>
-    loadFiles(); // Make sure words are loaded before quiz starts
+    loadFiles();
   </script>
 </body>
 </html>
