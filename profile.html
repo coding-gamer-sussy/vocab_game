@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>User Profile</h1>
+  <div id="profile-card">
+    <p><strong>Username:</strong> <span id="username">Guest</span></p>
+    <p><strong>Words Practiced:</strong> <span id="words">0</span></p>
+    <p><strong>Favorites:</strong> <span id="favorites">0</span></p>
+    <button onclick="clearStats()">Reset Stats</button>
+    <br><br>
+    <a href="index.html">← Back to Practice</a>
+  </div>
+
+  <script>
+    // Load stats from localStorage
+    document.getElementById('username').textContent = localStorage.getItem('username') || 'Guest';
+    document.getElementById('words').textContent = localStorage.getItem('wordsPracticed') || 0;
+    document.getElementById('favorites').textContent = JSON.parse(localStorage.getItem('favorites') || '[]').length;
+
+    function clearStats() {
+      localStorage.removeItem('wordsPracticed');
+      localStorage.removeItem('favorites');
+      location.reload();
+    }
+  </script>
+</body>
+</html>
