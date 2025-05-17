@@ -20,6 +20,19 @@ function loadFiles() {
     });
 }
 
+function promptUsername() {
+  if (!localStorage.getItem('username')) {
+    const name = prompt("Enter your username:", "Guest");
+    if (name) {
+      localStorage.setItem('username', name);
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  promptUsername();
+});
+
 function nextWord() {
   currentWordIndex = Math.floor(Math.random() * english.length);
   document.getElementById('chinese').textContent = chinese[currentWordIndex] + ' (' + pos[currentWordIndex] + ')';
