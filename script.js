@@ -108,6 +108,11 @@ function finishQuiz() {
   let prevXP = Number(localStorage.getItem('totalXP') || '0');
   localStorage.setItem('totalXP', prevXP + xp);
 
+  // Save total practiced words
+  let prevPracticed = Number(localStorage.getItem('totalPracticed') || '0');
+  localStorage.setItem('totalPracticed', prevPracticed + quizTotal);
+
+
   document.getElementById('scoreSummary').innerText =
     `Correct: ${quizCorrect} / ${quizTotal} (${Math.round(correctness * 100)}%)`;
   document.getElementById('xpGained').innerText = `You earned ${xp} XP!`;
