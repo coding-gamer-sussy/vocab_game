@@ -22,6 +22,8 @@
     document.getElementById('words').textContent = localStorage.getItem('wordsPracticed') || 0;
     document.getElementById('favorites').textContent = JSON.parse(localStorage.getItem('favorites') || '[]').length;
     document.getElementById('xp').textContent = localStorage.getItem('totalXP') || 0;
+    document.getElementById('practiced').textContent = localStorage.getItem('totalPracticed') || 0;
+
 
     function clearStats() {
       localStorage.removeItem('wordsPracticed');
