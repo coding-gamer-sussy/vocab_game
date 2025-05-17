@@ -14,6 +14,9 @@ function nextWord() {
   index = Math.floor(Math.random() * english.length);
   document.getElementById('question').innerHTML =
     `<strong>${english[index]}</strong> (${pos[index]})<br>意思：${chinese[index]}`;
+  // Increase the word practice count every time a new word is shown
+  let practiced = Number(localStorage.getItem('wordsPracticed') || '0');
+  localStorage.setItem('wordsPracticed', practiced + 1);
 }
 
 loadFiles();
