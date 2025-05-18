@@ -6,8 +6,22 @@
 </head>
 <body>
   <h1>Quiz Mode</h1>
-  <button onclick="startQuiz()">Start Quiz</button>
-  <p>After clicking, you'll be asked how many questions.</p>
+
+  <div id="quiz-settings">
+    <label for="questionCount">Number of Questions:</label>
+    <input type="number" id="questionCount" min="1" value="5">
+    <button onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <div id="quiz-area" style="display:none;">
+    <p id="quiz-question"></p>
+    <input type="text" id="quiz-answer" placeholder="Your answer">
+    <button onclick="submitQuizAnswer()">Submit</button>
+    <p id="quiz-feedback"></p>
+  </div>
+
+  <p id="quiz-result"></p>
+
   <br><a href="index.html">Back to Practice</a>
   <script src="script.js"></script>
   <script>
