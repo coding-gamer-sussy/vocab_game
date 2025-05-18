@@ -23,9 +23,16 @@ function checkAnswer() {
 
 function nextWord() {
   currentIndex = Math.floor(Math.random() * words.length);
-  document.getElementById('chinese').textContent = words[currentIndex] + ' (' + pos[currentIndex] + ')';
-  document.getElementById('answer').value = '';
+  const chineseElem = document.getElementById('chinese');
+  if (chineseElem) {
+    chineseElem.textContent = words[currentIndex] + ' (' + pos[currentIndex] + ')';
+  }
+  const answerElem = document.getElementById('answer');
+  if (answerElem) {
+    answerElem.value = '';
+  }
 }
+
 
 function addToFavorites() {
   const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
