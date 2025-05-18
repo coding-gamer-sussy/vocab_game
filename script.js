@@ -1,23 +1,92 @@
-let english = [], chinese = [], pos = [];
-let currentWordIndex;
+let words = [], english = [], pos = [];
+let currentIndex = 0;
 
 function loadFiles() {
-  fetch('english.txt')
-    .then(res => res.text())
-    .then(text => {
-      english = text.trim().split('\n');
-      return fetch('chinese.txt');
-    })
-    .then(res => res.text())
-    .then(text => {
-      chinese = text.trim().split('\n');
-      return fetch('pos.txt');
-    })
-    .then(res => res.text())
-    .then(text => {
-      pos = text.trim().split('\n');
-      nextWord();
-    });
+  Promise.all([
+    fetch('chinese.txt').then(res => res.text()),
+    fetch('english.txt').then(res => res.text()),
+    fetch('pos.txt').then(res => res.text())
+  ]).then(([ch, en, p]) => {
+    words = ch.trim().split('\n');
+    english = en.trim().split('\n');
+    pos = p.trim().split('\n');
+    nextWord();
+  });
+}
+
+function checkAnswer() {
+  const ans = document.getElementById('answer').value.trim().toLowerCase();
+  const correct = english[currentIndex].toLowerCase();
+  document.getElementById('result').textContent = ans === correct ? '✅ Correct!' : `❌ Wrong. Answer: ${correct}`;
+  nextWord();
+}
+
+function nextWord() {
+  currentIndex = Math.floor(Math.random() * words.length);
+  document.getElementById('chinese').textContent = words[currentIndex] + ' (' + pos[currentIndex] + ')';
+  document.getElementById('answer').value = '';
+}
+
+function addToFavorites() {
+  const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+  const word = `${words[currentIndex]} (${english[currentIndex]})`;
+  if (!favs.includes(word)) {
+    favs.push(word);
+    localStorage.setItem('favorites', JSON.stringify(favs));
+    alert('Added to favorites!');
+  }
+}
+
+function startQuiz() {
+  questionTotal = parseInt(document.getElementById('questionCount').value);
+  quizIndices = [];
+  for (let i = 0; i < questionTotal; i++) {
+    quizIndices.push(Math.floor(Math.random() * words.length));
+  }
+  quizCurrent = 0;
+  correctCount = 0;
+  wrongList = [];
+  document.getElementById('quiz-settings').style.display = 'none';
+  document.getElementById('quiz-area').style.display = 'block';
+  askQuizQuestion();
+}
+
+function askQuizQuestion() {
+  const idx = quizIndices[quizCurrent];
+  document.getElementById('quiz-question').textContent = `${words[idx]} (開頭-${english[idx][0]}) (${pos[idx]})`;
+  document.getElementById('quiz-answer').value = '';
+}
+
+function submitQuizAnswer() {
+  const idx = quizIndices[quizCurrent];
+  const userAns = document.getElementById('quiz-answer').value.trim().toLowerCase();
+  const correctAns = english[idx].toLowerCase();
+  if (userAns === correctAns) {
+    correctCount++;
+    document.getElementById('quiz-feedback').textContent = '✅ Correct!';
+  } else {
+    document.getElementById('quiz-feedback').textContent = `❌ Wrong! Answer: ${correctAns}`;
+    const wrongs = JSON.parse(localStorage.getItem('wrongs') || '[]');
+    const entry = `${words[idx]} (${correctAns})`;
+    if (!wrongs.includes(entry)) {
+      wrongs.push(entry);
+      localStorage.setItem('wrongs', JSON.stringify(wrongs));
+    }
+  }
+
+  quizCurrent++;
+  if (quizCurrent < questionTotal) {
+    askQuizQuestion();
+  } else {
+    const correctness = correctCount / questionTotal;
+    const xp = Math.round(Math.sqrt(questionTotal * correctCount) * (1 / (1.01 - correctness)) * Math.log10(questionTotal));
+    const prevXP = parseInt(localStorage.getItem('totalXP') || '0');
+    const prevCount = parseInt(localStorage.getItem('totalPracticed') || '0');
+    localStorage.setItem('totalXP', prevXP + xp);
+    localStorage.setItem('totalPracticed', prevCount + questionTotal);
+    document.getElementById('quiz-result').textContent = `You got ${correctCount}/${questionTotal} correct. XP Gained: ${xp}`;
+    document.getElementById('quiz-area').style.display = 'none';
+  }
 }
 
 function promptUsername() {
@@ -32,76 +101,3 @@ function promptUsername() {
 document.addEventListener("DOMContentLoaded", () => {
   promptUsername();
 });
-
-function nextWord() {
-  currentWordIndex = Math.floor(Math.random() * english.length);
-  document.getElementById('chinese').textContent = chinese[currentWordIndex] + ' (' + pos[currentWordIndex] + ')';
-  document.getElementById('answer').value = '';
-  document.getElementById('result').textContent = '';
-}
-
-function checkAnswer() {
-  const userAns = document.getElementById('answer').value.trim().toLowerCase();
-  const correct = english[currentWordIndex].toLowerCase();
-  document.getElementById('result').textContent = userAns === correct ? 'Correct!' : 'Wrong! Answer: ' + correct;
-}
-
-function addToFavorites() {
-  if (currentWordIndex === undefined) return;
-  let wordEntry = `${chinese[currentWordIndex]} = ${english[currentWordIndex]} (${pos[currentWordIndex]})`;
-  let storedFavs = JSON.parse(localStorage.getItem('favorites') || '[]');
-  if (!storedFavs.includes(wordEntry)) {
-    storedFavs.push(wordEntry);
-    localStorage.setItem('favorites', JSON.stringify(storedFavs));
-    alert("Added to favorites!");
-  } else {
-    alert("Already in favorites.");
-  }
-}
-
-// ---- Quiz Mode (used in quiz.html) ----
-let quizTotal = 0, quizCorrect = 0, quizWrong = [];
-
-function startQuiz() {
-  quizTotal = Number(prompt("How many questions?"));
-  quizCorrect = 0;
-  quizWrong = [];
-  askQuestion(0);
-}
-
-function askQuestion(i) {
-  if (i >= quizTotal) return finishQuiz();
-
-  const index = Math.floor(Math.random() * english.length);
-  const userAns = prompt(`${chinese[index]} (開頭-${english[index][0]}) (${pos[index]})`).trim().toLowerCase();
-  if (userAns === english[index].toLowerCase()) {
-    quizCorrect++;
-  } else {
-    quizWrong.push(`${chinese[index]} = ${english[index]} (${pos[index]})`);
-  }
-  askQuestion(i + 1);
-}
-
-function finishQuiz() {
-  const correctness = quizCorrect / quizTotal;
-  const xp = Math.floor(Math.sqrt(quizTotal * quizCorrect) * (1 / (1.01 - correctness)) * Math.log10(quizTotal));
-
-  // Save XP
-  let prevXP = Number(localStorage.getItem('totalXP') || '0');
-  localStorage.setItem('totalXP', prevXP + xp);
-
-  // Save Words Practiced
-  let prevPracticed = Number(localStorage.getItem('totalPracticed') || '0');
-  localStorage.setItem('totalPracticed', prevPracticed + quizTotal);
-
-  // Save Wrongs
-  let storedWrongs = JSON.parse(localStorage.getItem('wrongs') || '[]');
-  for (let item of quizWrong) {
-    if (!storedWrongs.includes(item)) {
-      storedWrongs.push(item);
-    }
-  }
-  localStorage.setItem('wrongs', JSON.stringify(storedWrongs));
-
-  alert(`Quiz finished! Correct: ${quizCorrect}/${quizTotal}, XP earned: ${xp}`);
-}
