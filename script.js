@@ -53,9 +53,11 @@ function startQuiz() {
 
 function askQuizQuestion() {
   const idx = quizIndices[quizCurrent];
+  document.getElementById('quiz-progress').textContent = `Question ${quizCurrent + 1} of ${questionTotal}`;
   document.getElementById('quiz-question').textContent = `${words[idx]} (開頭-${english[idx][0]}) (${pos[idx]})`;
   document.getElementById('quiz-answer').value = '';
 }
+
 
 function submitQuizAnswer() {
   const idx = quizIndices[quizCurrent];
